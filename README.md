@@ -13,7 +13,7 @@ python -m uvicorn app.main:app --reload
 ```
 
 ## Endpoints
-Root: http://127.0.0.1:8000 \n
-Health: http://127.0.0.1:8000/health \n
-API docs: http://127.0.0.1:8000/docs \n
+Root: http://127.0.0.1:8000 
+Health: http://127.0.0.1:8000/health 
+API docs: http://127.0.0.1:8000/docs 
 
