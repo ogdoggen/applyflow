@@ -2,7 +2,7 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from pygments.lexer import default
 
-from app.schemas.vacancies import VacancyCreate, VacancyRead
+from app.schemas.vacancies import VacancyCreate, VacancyRead, VacancyUpdate
 
 vacancies = ["python backend", "go backend", "devops", "cyber security"]
 fake_db = [
@@ -41,5 +41,28 @@ async def create_vacancy(vacancy : VacancyCreate):
     vacancy_id = max((existing_vacancy["id"] for existing_vacancy in fake_db), default=0) + 1
     new_vacancy = {"id" : vacancy_id, **vacancy.model_dump()}
     fake_db.append(new_vacancy)
-
     return new_vacancy
+
+@app.patch("/api/v1/vacancies/{vacancy_id}", status_code=200)
+async def update_vacancy(new_data : VacancyUpdate, vacancy_id : int):
+    if vacancy_id == None:
+        raise HTTPException(status_code=400, detail="enter vacancy id")
+    else:
+        updates = new_data.model_dump(exclude_unset=True)
+        for vacancy in fake_db:
+            if vacancy["id"] == vacancy_id:
+                for item in updates:
+                    vacancy[item] = updates[item]
+                    return vacancy
+    raise HTTPException(status_code=404, detail="not found")
+
+@app.delete("/api/v1/vacancies/{vacancy_id}", status_code=204)
+async def delete_vacancy(vacancy_id : int):
+    if vacancy_id == None:
+        raise HTTPException(status_code=400, detail="enter vacancy id")
+    else:
+        for vacancy in fake_db:
+            if vacancy["id"] == vacancy_id:
+                fake_db.remove(vacancy)
+                return
+    raise HTTPException(status_code=404, detail="not found")
