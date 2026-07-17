@@ -1,6 +1,5 @@
 from enum import Enum
 from pydantic import BaseModel, Field, HttpUrl
-from pygments.lexer import default
 
 class VacancyStatus (str, Enum):
     saved = "saved"
@@ -19,20 +18,16 @@ class Vacancy(BaseModel):
     description : str = None
 
 
-class VacancyCreate (BaseModel):
-    company : str = Field(min_length = 1, max_length = 100)
-    title : str = Field(min_length = 1, max_length = 150)
-    url : HttpUrl
-    status : VacancyStatus = VacancyStatus.saved
-    description : str = None
+class VacancyCreate (Vacancy):
+    pass
 
 
 class VacancyUpdate (BaseModel):
     company : str = Field(default=None, min_length=1, max_length= 100)
     title: str = Field(default=None, min_length=1, max_length=150)
-    url : HttpUrl = None
-    status : VacancyStatus = None
-    description : str = None
+    url : HttpUrl | None = None
+    status : VacancyStatus | None = None
+    description : str | None = None
 
 
 class VacancyRead (VacancyCreate):

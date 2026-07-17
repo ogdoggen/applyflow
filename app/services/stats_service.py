@@ -1,9 +1,9 @@
 
-from ..fake_database import fake_db
+from ..fake_database import fake_vacancies_db
 from app.schemas.vacancies import Vacancy
 
 async def vacancies_stats():
-    vacancies = [Vacancy(**b) for b in fake_db]
+    vacancies = [Vacancy(**b) for b in fake_vacancies_db]
     total = len(vacancies)
     total_by_status = {}
     for b in vacancies:

@@ -4,7 +4,7 @@ from pygments.lexer import default
 
 from app.schemas.vacancies import Vacancy, VacancyCreate, VacancyRead, VacancyUpdate, VacancyStatus
 
-from .routes import vacancies, health, stats
+from .routes import vacancies, health, stats, tasks
 
 
 app = FastAPI()
@@ -12,6 +12,7 @@ app = FastAPI()
 app.include_router(vacancies.router)
 app.include_router(health.router)
 app.include_router(stats.router)
+app.include_router(tasks.router)
 
 @app.get("/")
 async def root():
