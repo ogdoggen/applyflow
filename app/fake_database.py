@@ -1,5 +1,6 @@
+from datetime import date
 
-fake_db = [
+fake_vacancies_db = [
     {
         "id" : 1, "company": "Yandex", "title" : "python backend",
         "url" : "https://yandex.ru/backend/internship", "status" : "applied",
@@ -20,4 +21,22 @@ fake_db = [
         "url" : "https://avito.ru/cybersec/internship", "status" : "rejected",
         "description" : "want to try"
     },
+]
+
+fake_tasks_db = [
+    {
+        "id" : 1, "vacancy_id" : 1, "title" : "leetcode tasks",
+        "notes" : "look for top 20 yandex interview tasks and solve it",
+        "is_done" : False, "due_date" : date(2026, 7, 25)
+    },
+{
+        "id" : 2, "vacancy_id" : 1, "title" : ",ost common questions",
+        "notes" : "look for most popular questions on Yandex interviews and prepare for them",
+        "is_done" : False, "due_date" : date(2026, 7, 27)
+    },
+{
+        "id" : 3, "vacancy_id" : 1, "title" : "github prep",
+        "notes" : "look at your github repos, make good ones public, hide bad ones, set bio, profile photo",
+        "is_done" : False, "due_date" : date(2026, 7, 28)
+    }
 ]

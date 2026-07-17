@@ -1,11 +1,11 @@
 from fastapi import HTTPException
 
 from app.schemas.vacancies import Vacancy, VacancyCreate, VacancyRead, VacancyUpdate, VacancyStatus
-from ..fake_database import fake_db
+from ..fake_database import fake_vacancies_db
 
 async def list_vacancies(status : VacancyStatus | None = None, company : str | None = None,
                          limit: int | None = None, offset : int | None = None):
-    vacancies = [VacancyRead(**b) for b in fake_db]
+    vacancies = [VacancyRead(**b) for b in fake_vacancies_db]
 
     if status:
         vacancies = [b for b in vacancies if b.status == status]
@@ -19,7 +19,7 @@ async def list_vacancies(status : VacancyStatus | None = None, company : str | N
     return vacancies
 
 async def return_vacancy(vacancy_id : int):
-    for vacancy in fake_db:
+    for vacancy in fake_vacancies_db:
         if vacancy["id"] == vacancy_id:
             return vacancy
     raise HTTPException(
@@ -28,9 +28,9 @@ async def return_vacancy(vacancy_id : int):
     )
 
 async def create_vacancy(vacancy : VacancyCreate):
-    vacancy_id = max((existing_vacancy["id"] for existing_vacancy in fake_db), default=0) + 1
+    vacancy_id = max((existing_vacancy["id"] for existing_vacancy in fake_vacancies_db), default=0) + 1
     new_vacancy = {"id" : vacancy_id, **vacancy.model_dump()}
-    fake_db.append(new_vacancy)
+    fake_vacancies_db.append(new_vacancy)
     return new_vacancy
 
 async def update_vacancy(new_data: VacancyUpdate, vacancy_id: int):
@@ -40,7 +40,7 @@ async def update_vacancy(new_data: VacancyUpdate, vacancy_id: int):
     if not updates:
         raise HTTPException(status_code=400, detail="no updates were provided")
 
-    for vacancy in fake_db:
+    for vacancy in fake_vacancies_db:
         if vacancy["id"] == vacancy_id:
             vacancy.update(updates)
             return vacancy
@@ -51,8 +51,8 @@ async def delete_vacancy(vacancy_id : int):
     if vacancy_id == None:
         raise HTTPException(status_code=400, detail="enter vacancy id")
     else:
-        for vacancy in fake_db:
+        for vacancy in fake_vacancies_db:
             if vacancy["id"] == vacancy_id:
-                fake_db.remove(vacancy)
+                fake_vacancies_db.remove(vacancy)
                 return
     raise HTTPException(status_code=404, detail="not found")
