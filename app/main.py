@@ -1,9 +1,4 @@
-from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
-from pygments.lexer import default
-
-from app.schemas.vacancies import Vacancy, VacancyCreate, VacancyRead, VacancyUpdate, VacancyStatus
-
+from fastapi import FastAPI
 from .routes import vacancies, health, stats, tasks
 
 
