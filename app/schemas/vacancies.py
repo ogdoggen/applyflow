@@ -15,7 +15,7 @@ class Vacancy(BaseModel):
     title : str = Field(min_length = 1, max_length = 150)
     url : HttpUrl
     status : VacancyStatus = VacancyStatus.saved
-    description : str = None
+    description : str | None = None
 
 
 class VacancyCreate (Vacancy):

@@ -19,10 +19,10 @@ async def list_vacancies(status : VacancyStatus | None = None, company : str | N
                          limit: int | None = None, offset : int | None = None):
     vacancies = [VacancyRead(**b) for b in fake_vacancies_db]
 
-    if status:
+    if status is not None:
         vacancies = [b for b in vacancies if b.status == status]
 
-    if company:
+    if company is not None:
         vacancies = [b for b in vacancies if b.company.lower() == company.lower()]
 
     if limit is not None:

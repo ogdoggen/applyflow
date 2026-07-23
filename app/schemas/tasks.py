@@ -19,7 +19,7 @@ class PreparationTaskRead(BaseModel):
 
 class PreparationTaskUpdate(BaseModel):
 
-    title : int | None = None
+    title : str | None = None
     notes : str | None = None
     is_done : bool | None = None
     due_date : date | None = None

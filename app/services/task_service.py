@@ -34,16 +34,16 @@ async def create_task(task : tasks.PreparationTaskCreate, vacancy_id : int):
 async def list_tasks(vacancy_id : int, id : int | None = None,
                      is_done : bool | None = None,
                      due_date : date | None = None):
-
+    await find_vacancy_or_404(vacancy_id)
 
     list_tasks = [b for b in fake_tasks_db if b["vacancy_id"] == vacancy_id]
 
-    if id:
-        list_tasks = [b for b in list_tasks if b["id"] == id]
-    if is_done:
-        list_tasks = [b for b in list_tasks if b["is_done"] == is_done]
-    if due_date:
-        list_tasks = [b for b in list_tasks if b["due_date"] == due_date]
+    if id is not None:
+        list_tasks = [task for task in list_tasks if task["id"] == id]
+    if is_done is not None:
+        list_tasks = [task for task in list_tasks if task["is_done"] == is_done]
+    if due_date is not None:
+        list_tasks = [task for task in list_tasks if task["due_date"] == due_date]
 
     return list_tasks
 
