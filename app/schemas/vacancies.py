@@ -1,5 +1,5 @@
 from enum import Enum
-from pydantic import BaseModel, Field, HttpUrl
+from pydantic import BaseModel, Field, HttpUrl, ConfigDict
 
 class VacancyStatus (str, Enum):
     saved = "saved"
@@ -23,14 +23,17 @@ class VacancyCreate (Vacancy):
 
 
 class VacancyUpdate (BaseModel):
-    company : str = Field(default=None, min_length=1, max_length= 100)
-    title: str = Field(default=None, min_length=1, max_length=150)
+    company : str | None = Field(default=None, min_length=1, max_length= 100)
+    title: str | None = Field(default=None, min_length=1, max_length=150)
     url : HttpUrl | None = None
     status : VacancyStatus | None = None
     description : str | None = None
 
 
 class VacancyRead (VacancyCreate):
+    model_config = ConfigDict(from_attributes=True)
+
     id : int
+
 
 
