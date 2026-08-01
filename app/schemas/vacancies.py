@@ -30,10 +30,17 @@ class VacancyUpdate (BaseModel):
     description : str | None = None
 
 
-class VacancyRead (VacancyCreate):
+class VacancyRead (BaseModel):
+    id:int
+    company: str
+    title: str
+    url: HttpUrl
+    status: VacancyStatus
+    description: str | None = None
+
     model_config = ConfigDict(from_attributes=True)
 
-    id : int
+
 
 
 
