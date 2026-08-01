@@ -1,7 +1,10 @@
 from fastapi import HTTPException
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select
 
 from app.schemas.vacancies import Vacancy, VacancyCreate, VacancyRead, VacancyUpdate, VacancyStatus
 from ..fake_database import fake_vacancies_db, fake_tasks_db
+from app.models.vacancy import VacancyModel
 
 async def find_vacancy_or_404(vacancy_id : int):
     for vacancy in fake_vacancies_db:
@@ -15,29 +18,45 @@ async def does_id_exists(vacancy_id : int):
             return True
     return False
 
-async def list_vacancies(status : VacancyStatus | None = None, company : str | None = None,
+async def list_vacancies(session : AsyncSession ,status : VacancyStatus | None = None, company : str | None = None,
                          limit: int | None = None, offset : int | None = None):
-    vacancies = [VacancyRead(**b) for b in fake_vacancies_db]
+    # vacancies = [VacancyRead(**b) for b in fake_vacancies_db]
+    #
+    # if status is not None:
+    #     vacancies = [b for b in vacancies if b.status == status]
+    #
+    # if company is not None:
+    #     vacancies = [b for b in vacancies if b.company.lower() == company.lower()]
+    #
+    # if limit is not None:
+    #     vacancies = vacancies[:limit]
+    #
+    # return vacancies
 
-    if status is not None:
-        vacancies = [b for b in vacancies if b.status == status]
-
-    if company is not None:
-        vacancies = [b for b in vacancies if b.company.lower() == company.lower()]
-
-    if limit is not None:
-        vacancies = vacancies[:limit]
-
-    return vacancies
+    async with session.begin():
+        smth = select(VacancyModel).order_by(VacancyModel.id)
+        result = await session.scalars(smth)
+        return result.all()
 
 async def return_vacancy(vacancy_id : int):
     return await find_vacancy_or_404(vacancy_id)
 
-async def create_vacancy(vacancy : VacancyCreate):
-    vacancy_id = max((existing_vacancy["id"] for existing_vacancy in fake_vacancies_db), default=0) + 1
-    new_vacancy = {"id" : vacancy_id, **vacancy.model_dump()}
-    fake_vacancies_db.append(new_vacancy)
-    return new_vacancy
+async def create_vacancy(session : AsyncSession, vacancy : VacancyCreate):
+    # vacancy_id = max((existing_vacancy["id"] for existing_vacancy in fake_vacancies_db), default=0) + 1
+    # new_vacancy = {"id" : vacancy_id, **vacancy.model_dump()}
+    # fake_vacancies_db.append(new_vacancy)
+    # return new_vacancy
+    async with session.begin():
+        new_vacancy = VacancyModel(company=vacancy.company, title = vacancy.title,
+                                    url = str(vacancy.url) ,
+                                   status = vacancy.status,
+                                    description = vacancy.description)
+        session.add(new_vacancy)
+        await session.flush()
+        await session.refresh(new_vacancy)
+        return new_vacancy
+
+
 
 async def update_vacancy(new_data: VacancyUpdate, vacancy_id: int):
 
