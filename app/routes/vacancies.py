@@ -13,19 +13,19 @@ async def list_vacancies(session : db_session, status : VacancyStatus | None = N
                          limit: int | None = None, offset : int | None = None):
     return await vacancy_service.list_vacancies(session = session, status = status, company = company, limit = limit, offset = offset)
 
-@router.get("/{vacancy_id}")
-async def return_vacancy(vacancy_id:int):
-    return await vacancy_service.return_vacancy(vacancy_id)
+@router.get("/{vacancy_id}", response_model=VacancyRead)
+async def return_vacancy(session : db_session, vacancy_id:int):
+    return await vacancy_service.return_vacancy(session, vacancy_id)
 
 @router.post("", response_model= VacancyRead, status_code=201)
 async def create_vacancy(vacancy : VacancyCreate, session : db_session):
     return await vacancy_service.create_vacancy(session = session, vacancy = vacancy)
 
 
-@router.patch("/{vacancy_id}", status_code=200)
-async def update_vacancy(new_data: VacancyUpdate, vacancy_id: int):
-    return await vacancy_service.update_vacancy(new_data, vacancy_id)
+@router.patch("/{vacancy_id}", status_code=200, response_model=VacancyRead)
+async def update_vacancy(session : db_session, new_data: VacancyUpdate, vacancy_id: int):
+    return await vacancy_service.update_vacancy(session, new_data, vacancy_id)
 
 @router.delete("/{vacancy_id}", status_code=204)
-async def delete_vacancy(vacancy_id : int):
-    return await vacancy_service.delete_vacancy(vacancy_id)
+async def delete_vacancy(session : db_session ,vacancy_id : int):
+    return await vacancy_service.delete_vacancy(session, vacancy_id)
