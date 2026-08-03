@@ -19,7 +19,7 @@ async def does_id_exists(vacancy_id : int):
             return True
     return False
 
-async def list_vacancies(session : AsyncSession ,status : VacancyStatus | None = None, company : str | None = None,
+async def list_vacancies(session : AsyncSession, status : VacancyStatus | None = None, company : str | None = None,
                          limit: int | None = None, offset : int | None = None):
     # vacancies = [VacancyRead(**b) for b in fake_vacancies_db]
     #
@@ -34,9 +34,19 @@ async def list_vacancies(session : AsyncSession ,status : VacancyStatus | None =
     #
     # return vacancies
 
-    async with session.begin():
-        smth = select(VacancyModel).order_by(VacancyModel.id)
-        result = await session.scalars(smth)
+    async with (session.begin()):
+
+        stmt = (select(VacancyModel))
+        if status is not None:
+            stmt = stmt.where(VacancyModel.status == status)
+
+        if company is not None:
+            stmt = stmt.where(VacancyModel.company.ilike(company))
+
+        stmt = (stmt.order_by(VacancyModel.id)
+                .limit(limit)
+                .offset(offset))
+        result = await session.scalars(stmt)
         return result.all()
 
 async def return_vacancy(session : AsyncSession, vacancy_id : int):
