@@ -1,5 +1,5 @@
 from datetime import date
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 
 class PreparationTaskCreate(BaseModel):
@@ -16,6 +16,8 @@ class PreparationTaskRead(BaseModel):
     notes : str | None = None
     is_done : bool
     due_date : date
+
+    model_config = ConfigDict(from_attributes=True)
 
 class PreparationTaskUpdate(BaseModel):
 
