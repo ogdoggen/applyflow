@@ -16,11 +16,15 @@ async def does_vacancy_id_exists(vacancy_id : int):
         if vacancy["id"] == vacancy_id: return True
     return False
 
-async def find_task_or_404(id : int):
-    for task in fake_tasks_db:
-        if task["id"] == id:
-            return task
-    raise HTTPException(status_code=404, detail="task not found")
+async def find_task_or_404(session : AsyncSession, task_id : int):
+    # for task in fake_tasks_db:
+    #     if task["id"] == id:
+    #         return task
+    # raise HTTPException(status_code=404, detail="task not found")
+    task = await session.get(PreparationTaskModel, task_id)
+    if task is None:
+        raise HTTPException(status_code=404, detail="task not found")
+    return task
 
 async def find_vacancy_or_404(session : AsyncSession, vacancy_id : int):
     vacancy = await session.get(VacancyModel, vacancy_id)
@@ -72,10 +76,43 @@ async def list_tasks(session : AsyncSession, vacancy_id : int, task_id : int | N
     result = await session.scalars(stmt)
     return result.all()
 
-async def delete_task (vacancy_id : int, task_id : int):
-    vacancy = await find_vacancy_or_404(vacancy_id)
-    task = await find_task_or_404(task_id)
-    if task["vacancy_id"] != vacancy["id"]:
-        raise HTTPException(status_code=400, detail="bad request")
-    fake_tasks_db[:] = [b for b in fake_tasks_db if b != task]
+async def return_task(session : AsyncSession, vacancy_id : int, task_id : int):
+    await find_vacancy_or_404(session, vacancy_id)
+    task = await find_task_or_404(session, task_id)
+    return task
+
+async def delete_task (session : AsyncSession, vacancy_id : int, task_id : int):
+    # vacancy = await find_vacancy_or_404(vacancy_id)
+    # task = await find_task_or_404(task_id)
+    # if task["vacancy_id"] != vacancy["id"]:
+    #     raise HTTPException(status_code=400, detail="bad request")
+    # fake_tasks_db[:] = [b for b in fake_tasks_db if b != task]
+    # return
+    await find_vacancy_or_404(session, vacancy_id)
+    task = await find_task_or_404(session, task_id)
+    await session.delete(task)
+    try:
+        await session.commit()
+    except SQLAlchemyError:
+        await session.rollback()
+        raise
     return
+
+async def update_task(session : AsyncSession,
+                      vacancy_id : int,
+                      task_id : int,
+                      new_data : tasks.PreparationTaskUpdate):
+    await find_vacancy_or_404(session, vacancy_id)
+    task = await find_task_or_404(session, task_id)
+    updates = new_data.model_dump(mode="json", exclude_unset=True)
+    if updates is None:
+        raise HTTPException(status_code=400, detail="no updates were provided")
+    for attr, value in updates.items():
+        setattr(task, attr, value)
+    try:
+        await session.commit()
+        await session.refresh(task)
+    except SQLAlchemyError:
+        await session.rollback()
+        raise
+    return task

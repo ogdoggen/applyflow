@@ -18,6 +18,14 @@ async def list_tasks(session : db_session, vacancy_id : int, task_id : int | Non
                      due_date : date | None = None):
     return await task_service.list_tasks(session, vacancy_id, task_id, is_done, due_date)
 
+@router.get("/{vacancy_id}/tasks/{task_id}", response_model=tasks.PreparationTaskRead)
+async def return_task(session : db_session, vacancy_id : int, task_id : int):
+    return await task_service.return_task(session, vacancy_id, task_id)
+
 @router.delete("/{vacancy_id}/tasks/{task_id}")
 async def delete_task(session : db_session, vacancy_id : int, task_id : int):
     return await task_service.delete_task(session, vacancy_id, task_id)
+
+@router.patch("/{vacancy_id}/tasks/{task_id}", response_model=tasks.PreparationTaskRead)
+async def update_task(session : db_session, vacancy_id : int, task_id : int, updates : tasks.PreparationTaskUpdate):
+    return await task_service.update_task(session, vacancy_id, task_id, updates)
