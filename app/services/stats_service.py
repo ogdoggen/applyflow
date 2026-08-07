@@ -1,12 +1,12 @@
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select, func
+from app.models.vacancy import VacancyModel
 
-from ..fake_database import fake_vacancies_db
-from app.schemas.vacancies import Vacancy
+async def vacancies_stats(session : AsyncSession):
 
-async def vacancies_stats():
-    vacancies = [Vacancy(**b) for b in fake_vacancies_db]
-    total = len(vacancies)
-    total_by_status = {}
-    for b in vacancies:
-        total_by_status[b.status] = total_by_status.get(b.status, 0) + 1
-    answer = {"total number of vacancies" : total, **total_by_status}
-    return answer
+    stmt1 = select(func.count()).select_from(VacancyModel)
+    stmt2 = select(VacancyModel.status, func.count()).group_by(VacancyModel.status)
+    total = await session.scalar(stmt1)
+    by_status = (await session.execute(stmt2)).all()
+
+    return {"total vacancies number" : total, "by status" : [{row.status : row.count} for row in by_status]}

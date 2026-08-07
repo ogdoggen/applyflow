@@ -8,19 +8,10 @@ from ..models import VacancyModel
 
 
 from ..schemas import tasks
-from ..fake_database import fake_vacancies_db, fake_tasks_db
 
 
-async def does_vacancy_id_exists(vacancy_id : int):
-    for vacancy in fake_vacancies_db:
-        if vacancy["id"] == vacancy_id: return True
-    return False
 
 async def find_task_or_404(session : AsyncSession, task_id : int):
-    # for task in fake_tasks_db:
-    #     if task["id"] == id:
-    #         return task
-    # raise HTTPException(status_code=404, detail="task not found")
     task = await session.get(PreparationTaskModel, task_id)
     if task is None:
         raise HTTPException(status_code=404, detail="task not found")
@@ -33,13 +24,6 @@ async def find_vacancy_or_404(session : AsyncSession, vacancy_id : int):
     return vacancy
 
 async def create_task(session : AsyncSession, task : tasks.PreparationTaskCreate, vacancy_id : int):
-    # if not  await does_vacancy_id_exists(vacancy_id):
-    #     raise HTTPException(status_code=404, detail="vacancy not found")
-    # id = max([b["id"] for b in fake_tasks_db], default=0) + 1
-    # task = task.model_dump()
-    # new_task = {"id" : id, "vacancy_id" : vacancy_id, **task, "is_done" : False}
-    # fake_tasks_db.append(new_task)
-    # return new_task
 
     new_task = PreparationTaskModel(vacancy_id = vacancy_id,
                                     title = task.title,
@@ -82,12 +66,6 @@ async def return_task(session : AsyncSession, vacancy_id : int, task_id : int):
     return task
 
 async def delete_task (session : AsyncSession, vacancy_id : int, task_id : int):
-    # vacancy = await find_vacancy_or_404(vacancy_id)
-    # task = await find_task_or_404(task_id)
-    # if task["vacancy_id"] != vacancy["id"]:
-    #     raise HTTPException(status_code=400, detail="bad request")
-    # fake_tasks_db[:] = [b for b in fake_tasks_db if b != task]
-    # return
     await find_vacancy_or_404(session, vacancy_id)
     task = await find_task_or_404(session, task_id)
     await session.delete(task)
