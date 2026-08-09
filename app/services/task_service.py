@@ -32,6 +32,8 @@ async def create_task(session : AsyncSession, task : tasks.PreparationTaskCreate
     if task.notes is not None:
         new_task.notes = task.notes
 
+    await find_vacancy_or_404(session, vacancy_id)
+
     session.add(new_task)
     try:
         await session.commit()
