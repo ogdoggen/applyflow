@@ -7,6 +7,7 @@ class Settings(BaseSettings):
     debug : bool = False
 
     database_url : str
+    test_database_url : str
 
     model_config = SettingsConfigDict(extra="ignore")
 
