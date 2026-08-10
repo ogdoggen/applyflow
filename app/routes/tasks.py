@@ -8,7 +8,7 @@ from app.dependencies import db_session
 
 router = APIRouter(prefix= "/vacancies", tags=["tasks"])
 
-@router.post("/{vacancy_id}/tasks", response_model=tasks.PreparationTaskRead)
+@router.post("/{vacancy_id}/tasks", response_model=tasks.PreparationTaskRead, status_code=201)
 async def create_task(session : db_session,task : tasks.PreparationTaskCreate, vacancy_id : int):
     return await task_service.create_task(session, task, vacancy_id)
 
