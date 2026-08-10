@@ -47,7 +47,7 @@ async def prepare_test_database(anyio_backend):
 
 @pytest.fixture
 async def client():
-    app.dependency_overrides[get_db] = override_get_db
+    app.dependency_overrides[get_db()] = override_get_db()
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://test") as client:
         yield client
