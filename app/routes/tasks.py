@@ -22,7 +22,7 @@ async def list_tasks(session : db_session, vacancy_id : int, task_id : int | Non
 async def return_task(session : db_session, vacancy_id : int, task_id : int):
     return await task_service.return_task(session, vacancy_id, task_id)
 
-@router.delete("/{vacancy_id}/tasks/{task_id}")
+@router.delete("/{vacancy_id}/tasks/{task_id}", status_code=204)
 async def delete_task(session : db_session, vacancy_id : int, task_id : int):
     return await task_service.delete_task(session, vacancy_id, task_id)
 
