@@ -46,6 +46,7 @@ def run_migrations_offline() -> None:
     script output.
 
     """
+    from ..app.config import settings
     url = config.get_main_option("sqlalchemy.url")
     context.configure(
         url=url,

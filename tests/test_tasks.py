@@ -11,7 +11,6 @@ async def test_create_task_without_vacancy(client : AsyncClient):
                                         })
     assert response.status_code == 404
 
-@pytest.mark.anyio
 async def test_create_list_task(client : AsyncClient):
     create_vacancy_response = await client.post("/vacancies",
                                                 json={
