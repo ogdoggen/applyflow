@@ -11,8 +11,12 @@ from ..schemas import tasks
 
 
 
-async def find_task_or_404(session : AsyncSession, task_id : int):
+async def find_task_or_404(session : AsyncSession, task_id : int, vacancy_id : int):
     task = await session.get(PreparationTaskModel, task_id)
+
+    if task.vacancy_id != vacancy_id:
+        raise HTTPException(status_code=404, detail="task not found")
+
     if task is None:
         raise HTTPException(status_code=404, detail="task not found")
     return task
@@ -64,12 +68,12 @@ async def list_tasks(session : AsyncSession, vacancy_id : int, task_id : int | N
 
 async def return_task(session : AsyncSession, vacancy_id : int, task_id : int):
     await find_vacancy_or_404(session, vacancy_id)
-    task = await find_task_or_404(session, task_id)
+    task = await find_task_or_404(session, task_id, vacancy_id)
     return task
 
 async def delete_task (session : AsyncSession, vacancy_id : int, task_id : int):
     await find_vacancy_or_404(session, vacancy_id)
-    task = await find_task_or_404(session, task_id)
+    task = await find_task_or_404(session, task_id, vacancy_id)
     await session.delete(task)
     try:
         await session.commit()
@@ -83,9 +87,9 @@ async def update_task(session : AsyncSession,
                       task_id : int,
                       new_data : tasks.PreparationTaskUpdate):
     await find_vacancy_or_404(session, vacancy_id)
-    task = await find_task_or_404(session, task_id)
+    task = await find_task_or_404(session, task_id, vacancy_id)
     updates = new_data.model_dump(mode="json", exclude_unset=True)
-    if updates is None:
+    if not updates:
         raise HTTPException(status_code=400, detail="no updates were provided")
     for attr, value in updates.items():
         setattr(task, attr, value)
