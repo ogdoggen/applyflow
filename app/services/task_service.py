@@ -12,13 +12,11 @@ from ..schemas import tasks
 
 
 async def find_task_or_404(session : AsyncSession, task_id : int, vacancy_id : int):
-    task = await session.get(PreparationTaskModel, task_id)
-
-    if task.vacancy_id != vacancy_id:
-        raise HTTPException(status_code=404, detail="task not found")
-
+    stmt = select(PreparationTaskModel).where(PreparationTaskModel.id==task_id, PreparationTaskModel.vacancy_id == vacancy_id)
+    task = await session.scalar(stmt)
     if task is None:
         raise HTTPException(status_code=404, detail="task not found")
+
     return task
 
 async def find_vacancy_or_404(session : AsyncSession, vacancy_id : int):

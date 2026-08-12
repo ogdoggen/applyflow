@@ -44,3 +44,38 @@ async def test_create_list_task(client : AsyncClient):
                                         "due_date": "2026-08-09"
                                     }
 
+@pytest.mark.anyio
+async def test_get_not_your_task(client : AsyncClient):
+    create_vacancy = await client.post("/vacancies",
+                                                        json={
+                                                          "company": "test1",
+                                                          "title": "string",
+                                                          "url": "https://example.com/",
+                                                          "status": "saved",
+                                                          "description": "string"
+                                                        })
+    vacancy_id = create_vacancy.json()["id"]
+
+    create_another_vacancy = await client.post("/vacancies",
+                                               json={
+                                                   "company": "test2",
+                                                   "title": "string",
+                                                   "url": "https://example.com/",
+                                                   "status": "saved",
+                                                   "description": "string"
+                                               })
+
+    another_vacancy_id = create_another_vacancy.json()["id"]
+
+    create_task = await client.post(f"/vacancies/{vacancy_id}/tasks",
+                                    json={
+                                          "title": "string",
+                                          "notes": "string",
+                                          "due_date": "2026-08-12"
+                                        })
+    task_id = create_task.json()["id"]
+
+    get_task = await client.get(f"/vacancies/{another_vacancy_id}/tasks/{task_id}")
+    assert get_task.status_code == 404
+
+
