@@ -1,13 +1,16 @@
-from fastapi import HTTPException
+from fastapi import HTTPException, Depends
+from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy import select
 from pydantic import EmailStr
+from typing import Annotated
 
 from app.models.user import UserModel
 from app.schemas.users import UserCreate
+from app.schemas.token import Token
 
-from app.security import hash_password
+from app.security import hash_password, verify_password, create_access_token
 
 
 async def get_user_by_email(session : AsyncSession, email : EmailStr):
@@ -36,3 +39,13 @@ async def create_user(session : AsyncSession, user : UserCreate):
         await session.rollback()
         raise
     return new_user
+
+async def login(session : AsyncSession,
+                form_data : Annotated[OAuth2PasswordRequestForm, Depends()]):
+    user = await get_user_by_email(session, form_data.username)
+    if user is None:
+        raise HTTPException(status_code=401, detail="incorrect email or password")
+    if not verify_password(form_data.password, user.password_hash):
+        raise HTTPException(status_code=401, detail="incorrect email or password")
+    access_token = create_access_token(user.id)
+    return Token(access_token=access_token, token_type="bearer")
