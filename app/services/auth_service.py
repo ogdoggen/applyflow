@@ -16,8 +16,8 @@ from app.security import hash_password, verify_password, create_access_token
 async def get_user_by_email(session : AsyncSession, email : EmailStr):
     stmt = select(UserModel).where(UserModel.email == email)
     result = await session.scalar(stmt)
-    if result is None:
-        raise HTTPException(status_code=404, detail="email not found")
+    # if result is None:
+    #     raise HTTPException(status_code=404, detail="email not found")
     return result
 
 async def check_email_exists_error(session : AsyncSession, email : EmailStr):

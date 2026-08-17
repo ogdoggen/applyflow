@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta, timezone
-from config import settings
+from app.config import settings
 import jwt
 
 from pwdlib import PasswordHash
@@ -11,13 +11,13 @@ def hash_password(password:str):
 
 
 def verify_password(password:str, hashed_password:str):
-    return hash_password(password) == hashed_password
+    return password_hash.verify(password, hashed_password)
 
 def create_access_token(subject):
     expire = datetime.now(timezone.utc) + timedelta(minutes=settings.access_token_expire_minutes)
     payload = {
         "sub" : str(subject),
-        "exp" : expire
+        "exp" : expire,
     }
-    token = jwt.decode(payload, settings.secret_key, settings.jwt_algorithm)
+    token = jwt.encode(payload, settings.secret_key, settings.jwt_algorithm)
     return token
