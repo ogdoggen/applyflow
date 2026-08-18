@@ -1,5 +1,5 @@
 from fastapi import HTTPException, Depends
-from fastapi.security import OAuth2PasswordRequestForm
+from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy import select
@@ -10,7 +10,7 @@ from app.models.user import UserModel
 from app.schemas.users import UserCreate
 from app.schemas.token import Token
 
-from app.security import hash_password, verify_password, create_access_token
+from app.security import hash_password, verify_password, create_access_token, decode_access_token
 
 
 async def get_user_by_email(session : AsyncSession, email : EmailStr):
@@ -49,3 +49,4 @@ async def login(session : AsyncSession,
         raise HTTPException(status_code=401, detail="incorrect email or password")
     access_token = create_access_token(user.id)
     return Token(access_token=access_token, token_type="bearer")
+
