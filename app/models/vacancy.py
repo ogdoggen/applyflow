@@ -1,7 +1,5 @@
-
-
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from sqlalchemy import String, Text
+from sqlalchemy import String, Text, ForeignKey
 
 from ..db.base import Base
 
@@ -16,3 +14,6 @@ class VacancyModel(Base):
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
 
     tasks : Mapped[list["PreparationTaskModel"]] = relationship(back_populates="vacancy", passive_deletes=True)
+
+    owner_id : Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    owner : Mapped["UserModel"] = relationship(back_populates="vacancies")
