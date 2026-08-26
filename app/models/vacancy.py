@@ -15,5 +15,5 @@ class VacancyModel(Base):
 
     tasks : Mapped[list["PreparationTaskModel"]] = relationship(back_populates="vacancy", passive_deletes=True)
 
-    owner_id : Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    owner_id : Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
     owner : Mapped["UserModel"] = relationship(back_populates="vacancies")
