@@ -1,7 +1,7 @@
 from fastapi import HTTPException, Depends
 from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 from sqlalchemy import select
 from pydantic import EmailStr
 from typing import Annotated
@@ -35,9 +35,9 @@ async def create_user(session : AsyncSession, user : UserCreate):
     try:
         await session.commit()
         await session.refresh(new_user)
-    except:
+    except IntegrityError:
         await session.rollback()
-        raise
+        raise HTTPException(status_code=409, detail="such email already exists")
     return new_user
 
 async def login(session : AsyncSession,
