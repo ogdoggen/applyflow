@@ -11,4 +11,8 @@ class Settings(BaseSettings):
 
     model_config = SettingsConfigDict(extra="ignore")
 
+    secret_key : str
+    jwt_algorithm : str
+    access_token_expire_minutes : int
+
 settings = Settings()

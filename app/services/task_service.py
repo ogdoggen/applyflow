@@ -3,7 +3,10 @@ from datetime import date
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy import select
+from sqlalchemy.orm import selectinload
+
 from app.models.task import PreparationTaskModel
+from app.models.user import UserModel
 from ..models import VacancyModel
 
 
@@ -19,13 +22,14 @@ async def find_task_or_404(session : AsyncSession, task_id : int, vacancy_id : i
 
     return task
 
-async def find_vacancy_or_404(session : AsyncSession, vacancy_id : int):
-    vacancy = await session.get(VacancyModel, vacancy_id)
+async def find_owned_vacancy_or_404(session : AsyncSession, cur_user : UserModel, vacancy_id : int):
+    stmt = select(VacancyModel).where(VacancyModel.owner_id == cur_user.id, VacancyModel.id == vacancy_id)
+    vacancy = await session.scalar(stmt)
     if vacancy is None:
         raise HTTPException(status_code=404, detail="vacancy not found")
     return vacancy
 
-async def create_task(session : AsyncSession, task : tasks.PreparationTaskCreate, vacancy_id : int):
+async def create_task(session : AsyncSession, cur_user : UserModel, task : tasks.PreparationTaskCreate, vacancy_id : int):
 
     new_task = PreparationTaskModel(vacancy_id = vacancy_id,
                                     title = task.title,
@@ -34,7 +38,7 @@ async def create_task(session : AsyncSession, task : tasks.PreparationTaskCreate
     if task.notes is not None:
         new_task.notes = task.notes
 
-    await find_vacancy_or_404(session, vacancy_id)
+    await find_owned_vacancy_or_404(session, cur_user, vacancy_id)
 
     session.add(new_task)
     try:
@@ -46,13 +50,13 @@ async def create_task(session : AsyncSession, task : tasks.PreparationTaskCreate
     return new_task
 
 
-async def list_tasks(session : AsyncSession, vacancy_id : int, task_id : int | None = None,
+async def list_tasks(session : AsyncSession, cur_user : UserModel, vacancy_id : int, task_id : int | None = None,
                      is_done : bool | None = None,
                      due_date : date | None = None):
 
-    await find_vacancy_or_404(session, vacancy_id)
+    await find_owned_vacancy_or_404(session, cur_user, vacancy_id)
 
-    stmt = (select(PreparationTaskModel))
+    stmt = select(PreparationTaskModel)
     stmt = stmt.where(PreparationTaskModel.vacancy_id == vacancy_id)
     if task_id is not None:
         stmt = stmt.where(PreparationTaskModel.id == task_id)
@@ -64,13 +68,13 @@ async def list_tasks(session : AsyncSession, vacancy_id : int, task_id : int | N
     result = await session.scalars(stmt)
     return result.all()
 
-async def return_task(session : AsyncSession, vacancy_id : int, task_id : int):
-    await find_vacancy_or_404(session, vacancy_id)
+async def return_task(session : AsyncSession, cur_user : UserModel, vacancy_id : int, task_id : int):
+    await find_owned_vacancy_or_404(session, cur_user, vacancy_id)
     task = await find_task_or_404(session, task_id, vacancy_id)
     return task
 
-async def delete_task (session : AsyncSession, vacancy_id : int, task_id : int):
-    await find_vacancy_or_404(session, vacancy_id)
+async def delete_task (session : AsyncSession, cur_user : UserModel, vacancy_id : int, task_id : int):
+    await find_owned_vacancy_or_404(session, cur_user, vacancy_id)
     task = await find_task_or_404(session, task_id, vacancy_id)
     await session.delete(task)
     try:
@@ -81,10 +85,11 @@ async def delete_task (session : AsyncSession, vacancy_id : int, task_id : int):
     return
 
 async def update_task(session : AsyncSession,
+                      cur_user : UserModel,
                       vacancy_id : int,
                       task_id : int,
                       new_data : tasks.PreparationTaskUpdate):
-    await find_vacancy_or_404(session, vacancy_id)
+    await find_owned_vacancy_or_404(session, cur_user, vacancy_id)
     task = await find_task_or_404(session, task_id, vacancy_id)
     updates = new_data.model_dump(mode="json", exclude_unset=True)
     if not updates:
